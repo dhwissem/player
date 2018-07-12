@@ -1,0 +1,9 @@
+.track-information {
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+
+    width: 80vw;
+    height: 100%;
+
+}

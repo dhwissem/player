@@ -1,0 +1,6 @@
+.controls {
+    display: flex;
+    justify-content: space-around;
+    width: 158px;
+    margin: auto;
+}
