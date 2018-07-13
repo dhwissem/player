@@ -13,7 +13,8 @@ class App extends Component {
     tracks: [],
     currentTrack: 0,
     currentTime: 0,
-    isPlaying: false
+    isPlaying: false,
+    percent: 0
   };
 
   componentDidMount() {
@@ -23,13 +24,61 @@ class App extends Component {
       }));
   }
 
-  handlePlay = (index) => {
+  handleGoForward = (value) => {
+    const audio = document.getElementById('audio');
+    const timestamp = Math.floor(audio.currentTime) + value;
+    audio.currentTime = timestamp;
+  };
 
-    console.log("player num: " + index);
+  handleGoBackward = (value) => {
+    const audio = document.getElementById('audio');
+    const timestamp = Math.floor(audio.currentTime) - value;
+    audio.currentTime = timestamp;
+  }
+
+  handlePlay = (index) => {
+    const audio = document.getElementById('audio');
+
+    const { isPlaying, currentTrack } = this.state;
+
+    if (index !== currentTrack) {
+      this.setState({
+        currentTrack: index,
+        isPlaying: !isPlaying
+      }, () => {
+        audio.load();
+      })
+    }
+
+    if (!isPlaying) {
+      this.setState({
+        isPlaying: true
+      }, () => {
+        audio.play();
+      });
+
+    } else {
+      this.setState({
+        isPlaying: false
+      }, () => {
+        audio.pause();
+      });
+    }
+
+    setInterval(() => {
+      let percent = 0;
+      const duration = Math.floor(audio.duration);
+      const timestamp = Math.floor(audio.currentTime);
+
+      percent = (timestamp / duration) * 100;
+      this.setState({
+        percent
+      })
+    }, 100);
   }
 
   render() {
-    const { tracks, currentTrack } = this.state;
+    const { tracks, currentTrack, isPlaying, percent } = this.state;
     const currentSource = tracks.length && (BASE_URL + tracks[currentTrack].track_file);
 
     return tracks.length && (
@@ -39,8 +88,13 @@ class App extends Component {
             {
               tracks.map((track, index) => {
                 return (
-                  <div key={track.track_id}>
-                    <Player index={index} track={track} onPlay={this.handlePlay}/>
+                  <div key={track.track_id} style={{ marginBottom: '30px' }}>
+                    <Player index={index} track={track} isPlaying={(index === currentTrack) && isPlaying}
+                            onPlay={this.handlePlay}
+                            onGoForward={this.handleGoForward}
+                            onGoBackward={this.handleGoBackward}
+                            percent={percent}
+                    />
                   </div>)
               })
             }
